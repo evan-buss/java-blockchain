@@ -1,22 +1,26 @@
 package com.evanbuss.blockchain;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class BlockChain implements Iterable<Block> {
+  private final int pow;
   private List<Block> blockChain = new LinkedList<>();
 
-  BlockChain() {}
+  BlockChain(int pow) {
+    this.pow = pow;
+  }
 
-  void createBlock() {
+  Block createBlock() {
+    Block block;
     if (blockChain.size() == 0) {
-      blockChain.add(new Block("0"));
+      block = new Block("0", pow);
     } else {
-      blockChain.add(new Block(blockChain.get(blockChain.size() - 1).getHash()));
+      block = new Block(blockChain.get(blockChain.size() - 1).getHash(), pow);
     }
+    blockChain.add(block);
+    return block;
   }
 
   boolean validate() {
@@ -31,7 +35,6 @@ public class BlockChain implements Iterable<Block> {
     return true;
   }
 
-  @NotNull
   @Override
   public Iterator<Block> iterator() {
     return blockChain.iterator();

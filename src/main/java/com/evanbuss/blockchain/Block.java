@@ -1,8 +1,10 @@
 package com.evanbuss.blockchain;
 
 import com.evanbuss.blockchain.utils.StringUtil;
+import com.google.common.base.Strings;
 
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Block {
   private static long blockCount = 1;
@@ -10,8 +12,11 @@ public class Block {
   private long timestamp;
   private String prevHash;
   private String hash;
+  private int pow;
+  private int magicNumber;
 
-  Block(String prevHash) {
+  Block(String prevHash, int pow) {
+    this.pow = pow;
     this.id = blockCount++;
     this.prevHash = prevHash;
     this.timestamp = new Date().getTime();
@@ -19,8 +24,15 @@ public class Block {
   }
 
   private void generateHash() {
-    String data = id + prevHash + timestamp;
-    this.hash = StringUtil.applySha256(data);
+
+    String target = Strings.repeat("0", pow);
+    String data;
+
+    do {
+      magicNumber = Math.abs(ThreadLocalRandom.current().nextInt());
+      data = magicNumber + id + prevHash + timestamp;
+      hash = StringUtil.applySha256(data);
+    } while (!hash.substring(0, pow).equals(target));
   }
 
   String getHash() {
@@ -38,6 +50,8 @@ public class Block {
         + id
         + "\nTimestamp: "
         + timestamp
+        + "\nMagic Number: "
+        + magicNumber
         + "\nHash of the Previous Block:\n"
         + prevHash
         + "\nHash of the Block:\n"
