@@ -1,0 +1,7 @@
+Stage 3:
+    Some sort of thread pool to mine the same block as they come in.
+    Once a single thread declares victory, the other threads should drop and work on the new one
+    The time it takes to mine should be tracked, if it takes less than 10 seconds to mine, the POW number should be increased
+        if it takes over a minute to mine a block, the POW number should be reduced by one.
+
+    Not sure if the blockchain should be a singleton?

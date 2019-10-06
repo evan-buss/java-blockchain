@@ -3,11 +3,18 @@ package com.evanbuss.blockchain;
 import com.evanbuss.blockchain.utils.StringUtil;
 import com.google.common.base.Strings;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Block {
   private static long blockCount = 1;
+
   private long id;
   private long timestamp;
   private String prevHash;
@@ -24,15 +31,45 @@ public class Block {
   }
 
   private void generateHash() {
-
+    AtomicBoolean found = new AtomicBoolean(false);
     String target = Strings.repeat("0", pow);
-    String data;
 
-    do {
-      magicNumber = Math.abs(ThreadLocalRandom.current().nextInt());
-      data = magicNumber + id + prevHash + timestamp;
-      hash = StringUtil.applySha256(data);
-    } while (!hash.substring(0, pow).equals(target));
+    Callable<String> callable =
+        () -> {
+          while (!found.get()) {
+            int magicNumber = Math.abs(ThreadLocalRandom.current().nextInt());
+            String data = magicNumber + id + prevHash + timestamp;
+            String newHash = StringUtil.applySha256(data);
+            if (newHash.substring(0, pow).equals(target)) {
+              found.set(true);
+              return newHash;
+            }
+          }
+          return null;
+        };
+
+    ArrayList<Callable<String>> calls = new ArrayList<>();
+    // Run our hashing callable in multiple threads and save results in future ArrayList
+    for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+      calls.add(callable);
+    }
+
+    try {
+      // Spin up all the hashing threads
+      List<Future<String>> futures = HashPool.getInstance().invokeAll(calls);
+
+      // Loop through all the futures and
+      for (int i = 0; i < futures.size(); i++) {
+        Future<String> future = futures.get(i);
+        if (future.get() != null) {
+          System.out.println("Created by miner #" + (i + 1));
+          hash = future.get();
+          break;
+        }
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
   }
 
   String getHash() {
@@ -53,8 +90,10 @@ public class Block {
         + "\nMagic Number: "
         + magicNumber
         + "\nHash of the Previous Block:\n"
+        + "\t"
         + prevHash
         + "\nHash of the Block:\n"
+        + "\t"
         + hash;
   }
 }
