@@ -5,3 +5,14 @@ Stage 3:
         if it takes over a minute to mine a block, the POW number should be reduced by one.
 
     Not sure if the blockchain should be a singleton?
+
+
+TODO in the future
+Stage 5:
+    https://hyperskill.org/projects/50/stages/275/implement
+
+    Need to generate public / private keys for each message.
+    Don't feel like doing that right now, as it will require a more robust messaging system.
+
+
+
