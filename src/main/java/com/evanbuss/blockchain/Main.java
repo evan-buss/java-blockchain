@@ -5,15 +5,14 @@ public class Main {
 
     BlockChain blockChain = new BlockChain();
 
-    for (int i = 0; i < 5; i++) {
-      long start = System.currentTimeMillis();
+    for (int i = 0; i < 7; i++) {
       System.out.println(blockChain.createBlock());
-      System.out.println(
-          "Block was generating for " + (System.currentTimeMillis() - start) / 1000F + " Seconds");
-      System.out.println("N: " + blockChain.getPow() + "\n");
+      System.out.println();
     }
 
     System.out.println("Blockchain validation:");
     System.out.println(blockChain.validate());
+
+    blockChain.shutdown();
   }
 }

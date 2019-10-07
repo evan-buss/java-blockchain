@@ -9,12 +9,17 @@ import java.util.concurrent.Executors;
 class HashPool {
 
   private static ExecutorService instance =
-      Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+      Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors());
 
-  private HashPool() {
-  }
+  private HashPool() {}
 
   static ExecutorService getInstance() {
     return instance;
+  }
+
+  static void shutdown() {
+    if (instance != null) {
+      instance.shutdown();
+    }
   }
 }
